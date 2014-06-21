@@ -37,9 +37,7 @@ object Dependencies {
   def all(scalaVersion: String) = Seq(
     "com.bfil" %% "scalext" % "0.1.0-SNAPSHOT",
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-    "com.typesafe.akka" %% "akka-remote" % akkaVersion,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
-    "com.typesafe.akka" %% "akka-kernel" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     scalaVersion match {
       case "2.11.1" => "io.spray" %% "spray-can" % s"$sprayVersion-20140423"
@@ -64,10 +62,8 @@ object Dependencies {
     "org.jsoup" % "jsoup" % "1.7.2",
     "org.json4s" %% "json4s-native" % "3.2.10",
     "org.json4s" %% "json4s-ext" % "3.2.10",
-    "joda-time" % "joda-time" % "2.1",
-    "ch.qos.logback" % "logback-classic" % "1.0.9",
-    "org.mockito" % "mockito-all" % "1.9.5" % "test",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
+    "org.mockito" % "mockito-all" % "1.9.5" % "test",
     "org.hamcrest" % "hamcrest-all" % "1.3"
 )
 }
