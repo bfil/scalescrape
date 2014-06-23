@@ -3,7 +3,7 @@ import Keys._
 
 object ScalescrapeBuild extends Build {
 
-  val appVersion = "0.1.0-SNAPSHOT"
+  val buildVersion = "0.1.0"
 
   lazy val Scalescrape = Project(
     id = "scalescrape",
@@ -16,7 +16,7 @@ object ScalescrapeBuild extends Build {
   lazy val buildSettings = Seq(
     name := "scalescrape",
     organization := "com.bfil",
-    version := appVersion,
+    version := buildVersion,
     scalaVersion := "2.11.1",
     crossScalaVersions  := Seq("2.11.1", "2.10.4"),
     crossVersion := CrossVersion.binary,
@@ -35,7 +35,7 @@ object Dependencies {
   val sprayVersion = "1.3.1"
 
   def all(scalaVersion: String) = Seq(
-    "com.bfil" %% "scalext" % "0.1.0-SNAPSHOT",
+    "com.bfil" %% "scalext" % "0.1.0",
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
@@ -64,12 +64,12 @@ object Dependencies {
     "org.json4s" %% "json4s-ext" % "3.2.10",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test",
-    "org.hamcrest" % "hamcrest-all" % "1.3"
-)
+    "org.hamcrest" % "hamcrest-all" % "1.3")
 }
 
 object Resolvers {
   val all = Seq(
+    "BFil S3 Repo Releases" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/releases",
     "BFil S3 Repo Snapshots" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/snapshots",
     "Spray" at "http://repo.spray.io/",
     "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/")
