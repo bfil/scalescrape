@@ -3,7 +3,7 @@ import Keys._
 
 object ScalescrapeBuild extends Build {
 
-  val buildVersion = "0.1.0"
+  val buildVersion = "0.2.0-SNAPSHOT"
 
   lazy val Scalescrape = Project(
     id = "scalescrape",
