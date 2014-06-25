@@ -158,7 +158,7 @@ private def updateAccountEmail(newEmail: String) =
                 }
               }
             }
-          } else complete(EmailIsUpToDate) // (11)
+          } else complete(EmailUpToDate) // (11)
         }
       }
     }
