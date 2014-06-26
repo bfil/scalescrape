@@ -228,7 +228,178 @@ This was a simple example of some of the capabilities of the library, for more d
 
 ### Documentation
 
-TODO
+The main components of __Scalescrape__ are the `ScrapingActor` and the `CollectionActor` traits.
+
+To understand the details of the internal mechanics of the DSL read the documentation of [Scalext](https://github.com/bfil/scalext).
+
+#### Scraping Actor
+
+You can create a scraping Akka actor and use the scraping DSL by extending the `ScrapingActor` trait.
+
+__scrape__ 
+
+```scala
+def scrape[T](scrapingAction: Action)(implicit ac: ActorContext): Unit
+```
+
+It creates a `ScrapingContext` with a reference to the current message sender and an empty cookie jar, and passes it to the inner action:
+
+```scala
+scape {
+  ctx => println(ctx.requestor, ctx.cookies) // current sender, cookies
+}
+```
+
+__get__ 
+
+```scala
+def get(url: String)(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
+```
+
+It sends a `GET` request to the url provided and passes the response into the inner action:
+
+```scala
+get("http://www.example.com/home") { response =>
+  ctx => Unit
+}
+```
+
+__post__ 
+
+```scala
+def post[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
+```
+
+It sends the `POST` request and passes the response into the inner action:
+
+```scala
+post(Request("http://www.example.com/update", "some data")) { response =>
+  ctx => Unit
+}
+```
+
+__postForm__ 
+
+```scala
+def postForm[T](form: Form)(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
+```
+
+It sends the `POST` request with form data and passes the response into the inner action:
+
+```scala
+postForm("http://www.example.com/submit-form", Map("some" -> "data")) { response =>
+  ctx => Unit
+}
+```
+
+__put__ 
+
+```scala
+def put[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
+```
+
+It sends the `PUT` request and passes the response into the inner action:
+
+```scala
+put(Request("http://www.example.com/update", "some data")) { response =>
+  ctx => Unit
+}
+```
+
+__delete__ 
+
+```scala
+def delete[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
+```
+
+It sends the `DELETE` request and passes the response into the inner action:
+
+```scala
+delete(Request("http://www.example.com/update", "some data")) { response =>
+  ctx => Unit
+}
+```
+
+__cookies__ 
+
+```scala
+def cookies: ChainableAction1[Map[String, HttpCookie]]
+```
+
+It extracts the cookies from the current contexts and passes them into the inner function:
+
+```scala
+cookies { cookies =>
+  ctx => Unit
+}
+```
+
+__withCookies__ 
+
+```scala
+def withCookies(cookies: Map[String, HttpCookie]): ChainableAction0
+```
+
+It replaces the cookies of the current contexts with the ones specified and calls the inner function with the new context:
+
+```scala
+withCookies(newCookies) {
+  ctx => Unit
+}
+```
+
+__addCookie__ 
+
+```scala
+def addCookie(cookie: HttpCookie): ChainableAction0
+```
+
+Adds a cookie to the current contexts and calls the inner function with the new context:
+
+```scala
+addCookie(newCookie) {
+  ctx => Unit
+}
+```
+
+__dropCookie__ 
+
+```scala
+def dropCookie(cookieName: String): ChainableAction0
+```
+
+Adds a cookie to the current contexts and calls the inner function with the new context:
+
+```scala
+dropCookie("someCookie") {
+  ctx => Unit
+}
+```
+
+__complete__ 
+
+```scala
+def complete[T](message: Any): ActionResult
+```
+
+Completes the current scraping action by sending the specified message back to the original sender:
+
+```scala
+complete("done")
+```
+
+__fail__ 
+
+```scala
+def fail: ActionResult
+```
+
+Returns an Akka status failure message back to the original sender:
+
+```scala
+fail
+```
+
 
 License
 -------
