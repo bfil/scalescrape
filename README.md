@@ -382,7 +382,7 @@ __complete__
 def complete[T](message: Any): ActionResult
 ```
 
-Completes the current scraping action by sending the specified message back to the original sender:
+Completes the scraping action by sending the specified message back to the original sender:
 
 ```scala
 complete("done")
@@ -400,6 +400,142 @@ Returns an Akka status failure message back to the original sender:
 fail
 ```
 
+#### Collection Actor
+
+You can create a collection Akka actor and use the collection DSL by extending the `CollectionActor[T]` trait, where `T` is a `ScrapingActor`.
+
+__collect__ 
+
+```scala
+def collect(collectionAction: Action)(implicit tag: ClassTag[Scraper], ac: ActorContext): Unit
+```
+
+It spawns an instance of the `ScarpingActor` specified as a type parameter under the hood. It creates a `CollectionContext` with a reference to the scraping actor and to the current message sender, and passes the context to the inner action:
+
+```scala
+collect {
+  ctx => println(ctx.requestor, ctx.scraper) // current sender, scraping actor
+}
+```
+
+__collectUsingScraper__ 
+
+```scala
+def collectUsingScraper(scraper: ActorRef)(collectionAction: Action)(implicit ac: ActorContext): Unit
+```
+
+It creates a `CollectionContext` with a reference to the scraping actor specified and to the current message sender, and passes the context to the inner action:
+
+```scala
+collectUsingScraper(myScrapingActor) {
+  ctx => println(ctx.requestor, ctx.scraper) // current sender, scraping actor
+}
+```
+
+__askTo__
+
+```scala
+def askTo(messages: Any)(implicit ec: ExecutionContext): ChainableAction1[Any]
+```
+
+It sends messages (using `akka.pattern.ask`) to the scraping actor in the collection context and passes the received messages to the inner action:
+
+_Please note_: it currently handles correctly only up to 3 parameters.
+
+```scala
+askTo("say hello") {
+  case "hello" => complete("thanks")
+  case _ => fail
+}
+
+askTo("say hello", "say world") {
+  case ("hello", "world") => complete("thanks")
+  case _ => fail
+}
+
+askTo("say hello", "say world", "say bye") {
+  case ("hello", "world", "bye") => complete("bye")
+  case _ => fail
+}
+```
+
+__scraper__ 
+
+```scala
+def scraper: ChainableAction1[ActorRef]
+```
+
+It extracts the scraper from the current contexts and passes them into the inner function:
+
+```scala
+scraper { scraper =>
+  ctx => Unit
+}
+```
+
+__withScraper__ 
+
+```scala
+def withScraper(scraper: ActorRef): ChainableAction0
+```
+
+It replaces the scraper of the current contexts with the ones specified and calls the inner function with the new context:
+
+```scala
+withScraper(newScraper) {
+  ctx => Unit
+}
+```
+
+__notify__ 
+
+```scala
+def notify[T](message: Any): ChainableAction0
+```
+
+Sends a message back to the original sender and calls the inner action:
+
+```scala
+notify("hello") {
+  ctx => Unit
+}
+```
+
+__complete__ 
+
+```scala
+def complete[T](message: Any): ActionResult
+```
+
+Completes the collection action by sending the specified message back to the original sender:
+
+```scala
+complete("done")
+```
+
+__keepAlive__ 
+
+```scala
+def keepAlive: ActionResult
+```
+
+Completes the collection action by not sending any message back to the original sender and keeping the scraping actor alive:
+
+```scala
+keepAlive
+```
+
+__fail__ 
+
+```scala
+def fail: ActionResult
+```
+
+Returns an Akka status failure message back to the original sender and kills the scraping actor:
+
+```scala
+fail
+```
 
 License
 -------
