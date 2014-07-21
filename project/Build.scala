@@ -31,7 +31,7 @@ object ScalescrapeBuild extends Build {
 }
 
 object Dependencies {
-  val akkaVersion = "2.3.3"
+  val akkaVersion = "2.3.4"
   val sprayVersion = "1.3.1"
 
   def all(scalaVersion: String) = Seq(
@@ -40,26 +40,14 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     scalaVersion match {
-      case "2.11.1" => "io.spray" %% "spray-can" % s"$sprayVersion-20140423"
-      case "2.10.4" => "io.spray" % "spray-can" % sprayVersion
-    },
-    scalaVersion match {
-      case "2.11.1" => "io.spray" %% "spray-routing" % s"$sprayVersion-20140423"
-      case "2.10.4" => "io.spray" % "spray-routing" % sprayVersion
-    },
-    scalaVersion match {
-      case "2.11.1" => "io.spray" %% "spray-client" % s"$sprayVersion-20140423"
-      case "2.10.4" => "io.spray" % "spray-client" % sprayVersion
-    },
-    scalaVersion match {
-      case "2.11.1" => "io.spray" %% "spray-testkit" % s"$sprayVersion-20140423" % "test"
-      case "2.10.4" => "io.spray" % "spray-testkit" % sprayVersion % "test"
-    },
-    scalaVersion match {
       case "2.11.1" => "com.chuusai" %% "shapeless" % "2.0.0"
       case "2.10.4" => "com.chuusai" %% "shapeless" % "1.2.4"
     },
     "org.jsoup" % "jsoup" % "1.7.2",
+    "io.spray" %% "spray-can" % sprayVersion,
+    "io.spray" %% "spray-routing" % sprayVersion,
+    "io.spray" %% "spray-client" % sprayVersion,
+    "io.spray" %% "spray-testkit" % sprayVersion,
     "org.json4s" %% "json4s-native" % "3.2.10",
     "org.json4s" %% "json4s-ext" % "3.2.10",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
