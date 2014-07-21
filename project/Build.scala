@@ -52,7 +52,7 @@ object Dependencies {
     "org.json4s" %% "json4s-ext" % "3.2.10",
     "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test",
-    "org.hamcrest" % "hamcrest-all" % "1.3")
+    "org.hamcrest" % "hamcrest-all" % "1.3" % "test")
 }
 
 object Resolvers {
