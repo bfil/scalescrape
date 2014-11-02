@@ -6,15 +6,9 @@ A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext
 Setting up the dependencies
 ---------------------------
 
-__Scalescrape__ is available at my [S3 Repository](http://shrub.appspot.com/bfil-mvn-repo), and it is cross compiled and published for both Scala 2.10 and 2.11.
+__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com:8081/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.10 and 2.11.
 
-Using SBT, add the following plugin:
-
-```scala
-addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.2.0")
-```
-
-Add the following dependency to your SBT build file:
+Using SBT, add the following dependency to your build file:
 
 ```scala
 libraryDependencies ++= Seq(
@@ -25,7 +19,7 @@ libraryDependencies ++= Seq(
 Don't forget to add the following resolver:
 
 ```scala
-resolvers += "BFil S3 Repo Releases" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/releases"
+resolvers += "BFil Nexus Releases" at "http://nexus.b-fil.com:8081/nexus/content/repositories/releases/"
 ```
 
 ### Using snapshots
@@ -37,7 +31,7 @@ libraryDependencies ++= Seq(
   "com.bfil" %% "scalescrape" % "0.2.0-SNAPSHOT"
 )
 
-resolvers += "BFil S3 Repo Snapshots" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/snapshots"
+resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com:8081/nexus/content/repositories/snapshots/";
 ```
 
 Usage

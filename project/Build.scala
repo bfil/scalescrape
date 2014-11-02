@@ -1,38 +1,18 @@
 import sbt._
 import Keys._
+import com.bfil.sbt._
 
-object ScalescrapeBuild extends Build {
+object ProjectBuild extends BFilBuild with BFilPlugins {
 
   val buildVersion = "0.2.0-SNAPSHOT"
-
-  lazy val Scalescrape = Project(
-    id = "scalescrape",
-    base = file("."),
-    settings = Defaults.defaultSettings ++
-      buildSettings ++
-      compilersSettings ++
-      Publish.settings)
-
-  lazy val buildSettings = Seq(
-    name := "scalescrape",
-    organization := "com.bfil",
-    version := buildVersion,
-    scalaVersion := "2.11.1",
-    crossScalaVersions  := Seq("2.11.1", "2.10.4"),
-    crossVersion := CrossVersion.binary,
-    organizationName := "Bruno Filippone",
-    organizationHomepage := Some(url("http://www.b-fil.com")),
-    libraryDependencies <++= scalaVersion(Dependencies.all(_)),
-    resolvers ++= Resolvers.all)
-
-  lazy val compilersSettings = Seq(
-    scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-unchecked"),
-    javacOptions ++= Seq("-Xlint:unchecked", "-Xlint:deprecation"))
+    
+  lazy val project = BFilProject("scalescrape", file("."))
+  .settings(libraryDependencies ++= Dependencies.all(scalaVersion.value))
 }
 
 object Dependencies {
-  val akkaVersion = "2.3.4"
-  val sprayVersion = "1.3.1"
+  val akkaVersion = "2.3.6"
+  val sprayVersion = "1.3.2"
 
   def all(scalaVersion: String) = Seq(
     "com.bfil" %% "scalext" % "0.1.0",
@@ -40,7 +20,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     scalaVersion match {
-      case "2.11.1" => "com.chuusai" %% "shapeless" % "2.0.0"
+      case "2.11.2" => "com.chuusai" %% "shapeless" % "2.0.0"
       case "2.10.4" => "com.chuusai" %% "shapeless" % "1.2.4"
     },
     "org.jsoup" % "jsoup" % "1.7.2",
@@ -53,40 +33,4 @@ object Dependencies {
     "org.specs2" %% "specs2" % "2.3.12" % "test",
     "org.mockito" % "mockito-all" % "1.9.5" % "test",
     "org.hamcrest" % "hamcrest-all" % "1.3" % "test")
-}
-
-object Resolvers {
-  val all = Seq(
-    "BFil S3 Repo Releases" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/releases",
-    "BFil S3 Repo Snapshots" at "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/snapshots",
-    "Spray" at "http://repo.spray.io/",
-    "Sonatype OSS Releases" at "http://oss.sonatype.org/content/repositories/releases/")
-}
-
-object Publish {
-  def repository: Project.Initialize[Option[sbt.Resolver]] = version { (version: String) =>
-    val s3Bucket = "s3://bfil-mvn-repo.s3-eu-west-1.amazonaws.com/"
-    if (version.trim.endsWith("SNAPSHOT")) Some("BFil S3 Repo Snapshots" at s3Bucket + "snapshots")
-    else Some("BFil S3 Repo Releases" at s3Bucket + "releases")
-  }
-
-  lazy val settings = Seq(
-    publishMavenStyle := true,
-    publishTo <<= repository,
-    publishArtifact in Test := false,
-    pomIncludeRepository := { _ => false },
-    licenses := Seq("Apache 2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    homepage := Some(url("http://www.b-fil.com")),
-    pomExtra := (
-      <scm>
-        <url>git://github.com/bfil/scalescrape.git</url>
-        <connection>scm:git://github.com/bfil/scalescrape.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>bfil</id>
-          <name>Bruno Filippone</name>
-          <url>http://www.b-fil.com</url>
-        </developer>
-      </developers>))
 }

@@ -1,3 +1,5 @@
-addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "2.5.0")
+resolvers += "BFil Nexus Snapshots (Private)" at "http://nexus.b-fil.com:8081/nexus/content/repositories/private-snapshots/"
 
-addSbtPlugin("com.frugalmechanic" % "fm-sbt-s3-resolver" % "0.2.0")
+credentials += Credentials(Path.userHome / ".ivy2" / ".bfil-credentials")
+
+addSbtPlugin("com.bfil" % "sbt-bfil" % "0.1.0-SNAPSHOT")
