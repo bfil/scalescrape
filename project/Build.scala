@@ -20,7 +20,7 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     scalaVersion match {
-      case "2.11.2" => "com.chuusai" %% "shapeless" % "2.0.0"
+      case "2.11.4" => "com.chuusai" %% "shapeless" % "2.0.0"
       case "2.10.4" => "com.chuusai" %% "shapeless" % "1.2.4"
     },
     "org.jsoup" % "jsoup" % "1.7.2",

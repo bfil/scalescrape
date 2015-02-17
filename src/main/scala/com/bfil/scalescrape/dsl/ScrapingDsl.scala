@@ -7,14 +7,14 @@ import scala.xml.Elem
 import org.json4s.JsonAST.JValue
 import org.jsoup.nodes.Document
 
-import com.bfil.scalext.ContextualDsl
 import com.bfil.scalescrape.context.ScrapingContext
 import com.bfil.scalescrape.data.{Form, Request, ScrapingRequest, ScrapingResponse}
 import com.bfil.scalescrape.util.{HttpResponseParser, JsoupPimps, ScrapingPipeline}
+import com.bfil.scalext.ContextualDsl
 
 import akka.actor.{ActorContext, ActorRef}
 import shapeless.{:: => ::, HNil}
-import spray.http.{FormData, HttpCookie, HttpMethods, HttpRequest, HttpResponse}
+import spray.http.{FormData, HttpCookie, HttpMethod, HttpMethods, HttpRequest, HttpResponse}
 import spray.httpx.RequestBuilding.RequestBuilder
 import spray.httpx.marshalling.Marshaller
 
@@ -24,11 +24,11 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
     sealedScrape(ac.sender)
   }
 
-  def get(magnet: GetRequestMagnet): ChainableAction1[HttpResponse] = magnet
-  def post(magnet: PostRequestMagnet): ChainableAction1[HttpResponse] = magnet
-  def postForm(magnet: PostFormRequestMagnet): ChainableAction1[HttpResponse] = magnet
-  def put(magnet: PutRequestMagnet): ChainableAction1[HttpResponse] = magnet
-  def delete(magnet: DeleteRequestMagnet): ChainableAction1[HttpResponse] = magnet
+  def get(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.GET)
+  def post(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.POST)
+  def postForm(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.POST)
+  def put(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.PUT)
+  def delete(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.DELETE)
 
   def cookies: ChainableAction1[Map[String, HttpCookie]] = extract(_.cookies)
   def withCookies(cookies: Map[String, HttpCookie]): ChainableAction0 = mapContext(_.withCookies(cookies))
@@ -64,48 +64,29 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
         }
     }
 
-  trait GetRequestMagnet extends ChainableAction1[HttpResponse]
-
-  object GetRequestMagnet {
-    implicit def apply(url: String)(implicit ec: ExecutionContext, ac: ActorContext) = new GetRequestMagnet {
-      def happly(inner: (HttpResponse :: HNil) => Action) =
-        sendScrapingRequest(new RequestBuilder(HttpMethods.GET)(url)).happly(inner)
-    }
+  trait RequestMagnet {
+    def apply(method: HttpMethod): ChainableAction1[HttpResponse]
   }
 
-  trait PostFormRequestMagnet extends ChainableAction1[HttpResponse]
-
-  object PostFormRequestMagnet {
-    implicit def apply(form: Form)(implicit ec: ExecutionContext, ac: ActorContext) = new PostFormRequestMagnet {
-      def happly(inner: (HttpResponse :: HNil) => Action) =
-        sendScrapingRequest(new RequestBuilder(HttpMethods.POST)(form.action, FormData(form.data))).happly(inner)
+  object RequestMagnet {
+    implicit def fromURL(url: String)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
+      def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
+        def happly(inner: (HttpResponse :: HNil) => Action) =
+          sendScrapingRequest(new RequestBuilder(method)(url)).happly(inner)
+      }
     }
-  }
-
-  trait PostRequestMagnet extends ChainableAction1[HttpResponse]
-
-  object PostRequestMagnet {
-    implicit def apply[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) = new PostRequestMagnet {
-      def happly(inner: (HttpResponse :: HNil) => Action) =
-        sendScrapingRequest(new RequestBuilder(HttpMethods.POST)(request.url, request.content)).happly(inner)
+    implicit def fromForm(form: Form)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
+      def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
+        def happly(inner: (HttpResponse :: HNil) => Action) =
+          sendScrapingRequest(new RequestBuilder(method)(form.action, FormData(form.data))).happly(inner)
+      }
     }
-  }
-
-  trait PutRequestMagnet extends ChainableAction1[HttpResponse]
-
-  object PutRequestMagnet {
-    implicit def apply[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) = new PutRequestMagnet {
-      def happly(inner: (HttpResponse :: HNil) => Action) =
-        sendScrapingRequest(new RequestBuilder(HttpMethods.PUT)(request.url, request.content)).happly(inner)
-    }
-  }
-
-  trait DeleteRequestMagnet extends ChainableAction1[HttpResponse]
-
-  object DeleteRequestMagnet {
-    implicit def apply[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) = new DeleteRequestMagnet {
-      def happly(inner: (HttpResponse :: HNil) => Action) =
-        sendScrapingRequest(new RequestBuilder(HttpMethods.DELETE)(request.url, request.content)).happly(inner)
-    }
+    implicit def fromRequest[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) =
+      new RequestMagnet {
+        def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
+          def happly(inner: (HttpResponse :: HNil) => Action) =
+            sendScrapingRequest(new RequestBuilder(method)(request.url, request.content)).happly(inner)
+        }
+      }
   }
 }
