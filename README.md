@@ -1,6 +1,8 @@
 Scalescrape
 ===========
 
+[![Build Status](https://snap-ci.com/bfil/scalescrape/branch/master/build_image)](https://snap-ci.com/bfil/scalescrape/branch/master)
+
 A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext), for building Akka actor systems that scrape and collect data from any website.
 
 Setting up the dependencies
