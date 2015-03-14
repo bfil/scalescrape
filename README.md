@@ -6,7 +6,7 @@ A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext
 Setting up the dependencies
 ---------------------------
 
-__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com:8081/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.10 and 2.11.
+__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.10 and 2.11.
 
 Using SBT, add the following dependency to your build file:
 
@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
 Don't forget to add the following resolver:
 
 ```scala
-resolvers += "BFil Nexus Releases" at "http://nexus.b-fil.com:8081/nexus/content/repositories/releases/"
+resolvers += "BFil Nexus Releases" at "http://nexus.b-fil.com/nexus/content/repositories/releases/"
 ```
 
 ### Using snapshots
@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "com.bfil" %% "scalescrape" % "0.2.0-SNAPSHOT"
 )
 
-resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com:8081/nexus/content/repositories/snapshots/";
+resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com/nexus/content/repositories/snapshots/";
 ```
 
 Usage
