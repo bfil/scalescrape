@@ -13,7 +13,6 @@ import com.bfil.scalescrape.util.{HttpResponseParser, JsoupPimps, ScrapingPipeli
 import com.bfil.scalext.ContextualDsl
 
 import akka.actor.{ActorContext, ActorRef}
-import shapeless.{:: => ::, HNil}
 import spray.http.{FormData, HttpCookie, HttpMethod, HttpMethods, HttpRequest, HttpResponse}
 import spray.httpx.RequestBuilding.RequestBuilder
 import spray.httpx.marshalling.Marshaller
@@ -56,10 +55,10 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
     }
 
   private def receiveScrapingResponse(f: ScrapingContext => Future[ScrapingResponse])(implicit ec: ExecutionContext): ChainableAction1[HttpResponse] =
-    new ChainableAction1[HttpResponse] {
-      def happly(inner: (HttpResponse :: HNil) => Action) = ctx =>
+    ChainableAction { inner =>
+      ctx =>
         f(ctx).onComplete {
-          case Success(res @ ScrapingResponse(response, newContext)) => inner(response :: HNil)(newContext)
+          case Success(res @ ScrapingResponse(response, newContext)) => inner(Tuple1(response))(newContext)
           case Failure(ex) => throw ex
         }
     }
@@ -70,22 +69,19 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
 
   object RequestMagnet {
     implicit def fromURL(url: String)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
-      def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
-        def happly(inner: (HttpResponse :: HNil) => Action) =
-          sendScrapingRequest(new RequestBuilder(method)(url)).happly(inner)
+      def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
+        sendScrapingRequest(new RequestBuilder(method)(url)).tapply(inner)
       }
     }
     implicit def fromForm(form: Form)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
-      def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
-        def happly(inner: (HttpResponse :: HNil) => Action) =
-          sendScrapingRequest(new RequestBuilder(method)(form.action, FormData(form.data))).happly(inner)
+      def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
+        sendScrapingRequest(new RequestBuilder(method)(form.action, FormData(form.data))).tapply(inner)
       }
     }
     implicit def fromRequest[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) =
       new RequestMagnet {
-        def apply(method: HttpMethod) = new ChainableAction1[HttpResponse] {
-          def happly(inner: (HttpResponse :: HNil) => Action) =
-            sendScrapingRequest(new RequestBuilder(method)(request.url, request.content)).happly(inner)
+        def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
+          sendScrapingRequest(new RequestBuilder(method)(request.url, request.content)).tapply(inner)
         }
       }
   }

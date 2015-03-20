@@ -18,10 +18,6 @@ object Dependencies {
     "com.bfil" %% "scalext" % "0.2.0-SNAPSHOT",
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    scalaVersion match {
-      case "2.11.6" => "com.chuusai" %% "shapeless" % "2.0.0"
-      case "2.10.5" => "com.chuusai" %% "shapeless" % "1.2.4"
-    },
     "org.jsoup" % "jsoup" % "1.7.2",
     "io.spray" %% "spray-can" % sprayVersion,
     "io.spray" %% "spray-routing" % sprayVersion,
