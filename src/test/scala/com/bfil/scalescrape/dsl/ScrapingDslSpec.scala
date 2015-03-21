@@ -31,38 +31,38 @@ class ScrapingDslSpec extends DslSpec {
   "get" should {
     "send a GET request and call the inner action with the response" in new ScrapingDslSpecContext {
       responder.sendReceive(any) returns Future { HttpResponse(200, "hello") }
-      asyncCheck(get("/some/url")) { response =>
+      get("/some/url").checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("hello")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(GET) and hasUri("/some/url") and hasData("")))
     }
 
     "send a GET request and parse an HTML response" in new ScrapingDslSpecContext {
       responder.sendReceive(any) returns Future { HttpResponse(200, "<span>hello</span>") }
-      asyncCheck(get("/some/url")) { response =>
+      get("/some/url") checkAsync { response =>
         response.asHtml { doc =>
           ctx => doc.$("span").text must beEqualTo("hello")
         }
-      }
+      } await
     }
 
     "send a GET request and parse an XML response" in new ScrapingDslSpecContext {
       responder.sendReceive(any) returns Future { HttpResponse(200, "<say>hello</say>") }
-      asyncCheck(get("/some/url")) { response =>
+      get("/some/url") checkAsync { response =>
         response.asXml { xml =>
           ctx => xml.text must beEqualTo("hello")
         }
-      }
+      } await
     }
 
     "send a GET request and parse a JSON response" in new ScrapingDslSpecContext {
       responder.sendReceive(any) returns Future { HttpResponse(200, "{\"say\":\"hello\"}") }
-      asyncCheck(get("/some/url")) { response =>
+      get("/some/url") checkAsync { response =>
         response.asJson { json =>
           ctx => (json \ "say") must beEqualTo(JString("hello"))
         }
-      }
+      } await
     }
   }
 
@@ -70,9 +70,9 @@ class ScrapingDslSpec extends DslSpec {
     "send a POST request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(post(request)) { response =>
+      post(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(POST) and hasUri("/some/url") and hasData("some data")))
     }
@@ -82,9 +82,9 @@ class ScrapingDslSpec extends DslSpec {
 
       val request = Request("/some/url", Data("test", 1))
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(post(request)) { response =>
+      post(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(POST) and hasUri("/some/url") and hasData("{\"key\":\"test\",\"value\":1}")))
     }
@@ -96,9 +96,9 @@ class ScrapingDslSpec extends DslSpec {
 
     "send a POST request with form data and call the inner action with the response" in new ScrapingDslSpecContext {
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(postForm(form)) { response =>
+      postForm(form).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(POST) and hasUri("/some/url") and hasData("key=value")))
     }
@@ -108,9 +108,9 @@ class ScrapingDslSpec extends DslSpec {
     "send a PUT request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(put(request)) { response =>
+      put(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(PUT) and hasUri("/some/url") and hasData("some data")))
     }
@@ -120,9 +120,9 @@ class ScrapingDslSpec extends DslSpec {
 
       val request = Request("/some/url", Data("test", 1))
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(put(request)) { response =>
+      put(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(PUT) and hasUri("/some/url") and hasData("{\"key\":\"test\",\"value\":1}")))
     }
@@ -132,9 +132,9 @@ class ScrapingDslSpec extends DslSpec {
     "send a DELETE request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(delete(request)) { response =>
+      delete(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(DELETE) and hasUri("/some/url") and hasData("some data")))
     }
@@ -144,9 +144,9 @@ class ScrapingDslSpec extends DslSpec {
 
       val request = Request("/some/url", Data("test", 1))
       responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
-      asyncCheck(delete(request)) { response =>
+      delete(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
-      }
+      }.await
       there was one(responder).sendReceive(argThat(
         hasMethod(DELETE) and hasUri("/some/url") and hasData("{\"key\":\"test\",\"value\":1}")))
     }
@@ -155,7 +155,7 @@ class ScrapingDslSpec extends DslSpec {
   "cookies" should {
     "extract the cookies from the context and pass them into the inner action" in new ScrapingDslSpecContext {
       implicit val scrapingContext = ScrapingContext(cookies = Map("authToken" -> HttpCookie("authToken", "someToken")))
-      asyncCheck(cookies) { cookies =>
+      cookies check { cookies =>
         ctx =>
           cookies.size must beEqualTo(1)
           cookies.get("authToken") must beEqualTo(Some(HttpCookie("authToken", "someToken")))
@@ -164,7 +164,7 @@ class ScrapingDslSpec extends DslSpec {
 
     "extract the cookies from the context even when there are none and pass them into the inner action" in new ScrapingDslSpecContext {
       implicit val scrapingContext = ScrapingContext()
-      asyncCheck(cookies) { cookies =>
+      cookies check { cookies =>
         ctx =>
           cookies.size must beEqualTo(0)
           cookies must beEqualTo(Map.empty)
@@ -175,27 +175,27 @@ class ScrapingDslSpec extends DslSpec {
   "withCookies" should {
     "replace the cookies in the context and pass the new context into the inner action" in new ScrapingDslSpecContext {
       val newCookies = Map("authToken" -> HttpCookie("authToken", "someToken"))
-      asyncCheck(withCookies(newCookies)) { ctx =>
+      withCookies(newCookies) check { ctx =>
         ctx.cookies.size must beEqualTo(1)
         ctx.cookies.get("authToken") must beEqualTo(Some(HttpCookie("authToken", "someToken")))
       }
     }
   }
-  
+
   "addCookie" should {
     "add a cookie in the context and pass the new context into the inner action" in new ScrapingDslSpecContext {
       val newCookie = HttpCookie("authToken", "someToken")
-      asyncCheck(addCookie(newCookie)) { ctx =>
+      addCookie(newCookie) check { ctx =>
         ctx.cookies.size must beEqualTo(1)
         ctx.cookies.get("authToken") must beEqualTo(Some(HttpCookie("authToken", "someToken")))
       }
     }
   }
-  
+
   "dropCookie" should {
     "drop a cookie from the context and pass the new context into the inner action" in new ScrapingDslSpecContext {
       implicit val scrapingContext = ScrapingContext(cookies = Map("authToken" -> HttpCookie("authToken", "someToken")))
-      asyncCheck(dropCookie("authToken")) { ctx =>
+      dropCookie("authToken") check { ctx =>
         ctx.cookies.size must beEqualTo(0)
         ctx.cookies must beEqualTo(Map.empty)
       }
