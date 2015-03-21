@@ -2,7 +2,7 @@ import sbt._
 import Keys._
 import com.bfil.sbt._
 
-object ProjectBuild extends BFilBuild with BFilPlugins {
+object ProjectBuild extends BFilBuild {
 
   val buildVersion = "0.2.0-SNAPSHOT"
     
@@ -17,17 +17,17 @@ object Dependencies {
   def all(scalaVersion: String) = Seq(
     "com.bfil" %% "scalext" % "0.2.0-SNAPSHOT",
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-    "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    "org.jsoup" % "jsoup" % "1.7.2",
     "io.spray" %% "spray-can" % sprayVersion,
-    "io.spray" %% "spray-routing" % sprayVersion,
     "io.spray" %% "spray-client" % sprayVersion,
+    "org.jsoup" % "jsoup" % "1.8.1",
+    "org.json4s" %% "json4s-native" % "3.2.11",
+    "org.json4s" %% "json4s-ext" % "3.2.11",
+    "com.bfil" %% "scalext-testkit" % "0.2.0-SNAPSHOT" % "test",
+    "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     scalaVersion match {
       case "2.11.6" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.11")
       case "2.10.5" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.10")
     },
-    "org.json4s" %% "json4s-native" % "3.2.10",
-    "org.json4s" %% "json4s-ext" % "3.2.10",
     "org.specs2" %% "specs2-core" % "2.4.17" % "test",
     "org.specs2" %% "specs2-mock" % "2.4.17" % "test",
     "org.mockito" % "mockito-all" % "1.10.19" % "test",
