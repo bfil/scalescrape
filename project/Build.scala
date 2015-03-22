@@ -4,7 +4,7 @@ import com.bfil.sbt._
 
 object ProjectBuild extends BFilBuild {
 
-  val buildVersion = "0.2.0"
+  val buildVersion = "0.3.0-SNAPSHOT"
     
   lazy val project = BFilProject("scalescrape", file("."))
   .settings(libraryDependencies ++= Dependencies.all(scalaVersion.value))
