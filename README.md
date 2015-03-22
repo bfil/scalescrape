@@ -3,7 +3,7 @@ Scalescrape
 
 [![Build Status](https://snap-ci.com/bfil/scalescrape/branch/master/build_image)](https://snap-ci.com/bfil/scalescrape/branch/master)
 
-A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext), for building Akka actor systems that scrape and collect data from any website.
+A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext), for building Akka actor systems that scrape and collect data from any type of website.
 
 Setting up the dependencies
 ---------------------------
@@ -14,7 +14,7 @@ Using SBT, add the following dependency to your build file:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.1.0"
+  "com.bfil" %% "scalescrape" % "0.2.0"
 )
 ```
 
@@ -30,7 +30,7 @@ If you need a snapshot dependency:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.2.0-SNAPSHOT"
+  "com.bfil" %% "scalescrape" % "0.3.0-SNAPSHOT"
 )
 
 resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com/nexus/content/repositories/snapshots/";

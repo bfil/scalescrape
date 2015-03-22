@@ -4,7 +4,7 @@ import com.bfil.sbt._
 
 object ProjectBuild extends BFilBuild {
 
-  val buildVersion = "0.2.0-SNAPSHOT"
+  val buildVersion = "0.2.0"
     
   lazy val project = BFilProject("scalescrape", file("."))
   .settings(libraryDependencies ++= Dependencies.all(scalaVersion.value))
@@ -15,14 +15,14 @@ object Dependencies {
   val sprayVersion = "1.3.2"
 
   def all(scalaVersion: String) = Seq(
-    "com.bfil" %% "scalext" % "0.2.0-SNAPSHOT",
+    "com.bfil" %% "scalext" % "0.2.0",
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "io.spray" %% "spray-can" % sprayVersion,
     "io.spray" %% "spray-client" % sprayVersion,
     "org.jsoup" % "jsoup" % "1.8.1",
     "org.json4s" %% "json4s-native" % "3.2.11",
     "org.json4s" %% "json4s-ext" % "3.2.11",
-    "com.bfil" %% "scalext-testkit" % "0.2.0-SNAPSHOT" % "test",
+    "com.bfil" %% "scalext-testkit" % "0.2.0" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     scalaVersion match {
       case "2.11.6" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.11")
