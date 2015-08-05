@@ -23,7 +23,7 @@ object Dependencies {
     "com.bfil" %% "scalext-testkit" % "0.2.0" % "test",
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     scalaVersion match {
-      case "2.11.6" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.11")
+      case "2.11.7" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.11")
       case "2.10.5" => "io.spray" %% "spray-testkit" % sprayVersion % "test" exclude("org.specs2", "specs2_2.10")
     },
     "org.specs2" %% "specs2-core" % "2.4.17" % "test",
