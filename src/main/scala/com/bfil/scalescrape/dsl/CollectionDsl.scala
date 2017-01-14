@@ -1,30 +1,31 @@
 package com.bfil.scalescrape.dsl
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration._
 import scala.reflect.ClassTag
-
-import com.bfil.scalescrape.context.CollectionContext
-import com.bfil.scalext.ContextualDsl
 
 import akka.actor.{Actor, ActorContext, ActorRef, Props}
 import akka.pattern.ask
 import akka.util.Timeout
-import akka.util.Timeout.durationToTimeout
+import com.bfil.scalescrape.context.CollectionContext
+import com.bfil.scalext.ContextualDsl
 
 trait CollectionDsl[T <: Actor] extends ContextualDsl[CollectionContext] {
   type Scraper = T
 
+  implicit def actorContext: ActorContext
+  implicit def executionContext: ExecutionContext
+
   implicit val timeout: Timeout = 10 seconds
 
-  def collect(collectionAction: Action)(implicit tag: ClassTag[Scraper], ac: ActorContext) = {
-    val scraper = ac.actorOf(Props[Scraper])
+  def collect(collectionAction: Action)(implicit tag: ClassTag[Scraper]) = {
+    val scraper = actorContext.actorOf(Props[Scraper])
     def sealedScrape(sender: ActorRef) = collectionAction(CollectionContext(sender).withScraper(scraper))
-    sealedScrape(ac.sender)
+    sealedScrape(actorContext.sender)
   }
-  def collectUsingScraper(scraper: ActorRef)(collectionAction: Action)(implicit ac: ActorContext) = {
+  def collectUsingScraper(scraper: ActorRef)(collectionAction: Action) = {
     def sealedScrape(sender: ActorRef) = collectionAction(CollectionContext(sender).withScraper(scraper))
-    sealedScrape(ac.sender)
+    sealedScrape(actorContext.sender)
   }
 
   def askTo(magnet: AskMagnet): ChainableAction1[Any] = magnet.action
@@ -42,7 +43,7 @@ trait CollectionDsl[T <: Actor] extends ContextualDsl[CollectionContext] {
   }
 
   object AskMagnet {
-    implicit def apply(messages: Any)(implicit ec: ExecutionContext) = new AskMagnet {
+    implicit def apply(messages: Any) = new AskMagnet {
       val action: ChainableAction1[Any] = ChainableAction { inner =>
         onSuccess { ctx: Context =>
           messages match {

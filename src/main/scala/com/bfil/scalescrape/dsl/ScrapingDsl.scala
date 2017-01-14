@@ -4,23 +4,30 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import scala.xml.Elem
 
-import org.json4s.JsonAST.JValue
-import org.jsoup.nodes.Document
-
+import akka.actor.{ActorContext, ActorRef, ActorSystem}
+import akka.http.scaladsl.client.RequestBuilding.RequestBuilder
+import akka.http.scaladsl.marshalling.ToEntityMarshaller
+import akka.http.scaladsl.model.{FormData, HttpMethod, HttpMethods, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.headers.HttpCookie
+import akka.stream.Materializer
 import com.bfil.scalescrape.context.ScrapingContext
 import com.bfil.scalescrape.data.{Form, Request, ScrapingRequest, ScrapingResponse}
 import com.bfil.scalescrape.util.{HttpResponseParser, JsoupPimps, ScrapingPipeline}
 import com.bfil.scalext.ContextualDsl
+import org.json4s.JsonAST.JValue
+import org.jsoup.nodes.Document
 
-import akka.actor.{ActorContext, ActorRef}
-import spray.http.{FormData, HttpCookie, HttpMethod, HttpMethods, HttpRequest, HttpResponse}
-import spray.httpx.RequestBuilding.RequestBuilder
-import spray.httpx.marshalling.Marshaller
+trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline
+  with HttpResponseParser with JsoupPimps {
 
-trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline with JsoupPimps {
-  def scrape[T](scrapingAction: Action)(implicit ac: ActorContext) = {
+  implicit def actorContext: ActorContext
+  implicit def actorSystem: ActorSystem
+  implicit def executionContext: ExecutionContext
+  implicit def materializer: Materializer
+
+  def scrape[T](scrapingAction: Action) = {
     def sealedScrape(sender: ActorRef) = scrapingAction(ScrapingContext(sender))
-    sealedScrape(ac.sender)
+    sealedScrape(actorContext.sender)
   }
 
   def get(magnet: RequestMagnet): ChainableAction1[HttpResponse] = magnet(HttpMethods.GET)
@@ -38,23 +45,23 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
   def fail: ActionResult = ActionResult { _.fail }
 
   implicit class ParsableHttpResponse(httpResponse: HttpResponse) {
-    def asHtml(f: Document => Action) = f(HttpResponseParser.toHtml(httpResponse))
-    def asXml(f: Elem => Action) = f(HttpResponseParser.toXml(httpResponse))
-    def asJson(f: JValue => Action) = f(HttpResponseParser.toJson(httpResponse))
+    def asHtml(f: Document => Action) = onSuccess(parseAsHtml(httpResponse))(f)
+    def asXml(f: Elem => Action) = onSuccess(parseAsXml(httpResponse))(f)
+    def asJson(f: JValue => Action) = onSuccess(parseAsJson(httpResponse))(f)
   }
 
-  private def sendReceive(scrapingRequest: ScrapingRequest)(implicit ec: ExecutionContext, ac: ActorContext): Future[ScrapingResponse] = {
+  private def sendReceive(scrapingRequest: ScrapingRequest): Future[ScrapingResponse] = {
     val pipeline = sendReceiveWithScrapingContext(scrapingRequest.context)
     pipeline { scrapingRequest.request }
   }
 
-  private def sendScrapingRequest(httpRequest: HttpRequest)(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse] =
+  private def sendScrapingRequest(httpRequest: HttpRequest): ChainableAction1[HttpResponse] =
     receiveScrapingResponse { ctx =>
       val scrapingRequest = ScrapingRequest(httpRequest, ctx)
       sendReceive(scrapingRequest)
     }
 
-  private def receiveScrapingResponse(f: ScrapingContext => Future[ScrapingResponse])(implicit ec: ExecutionContext): ChainableAction1[HttpResponse] =
+  private def receiveScrapingResponse(f: ScrapingContext => Future[ScrapingResponse]): ChainableAction1[HttpResponse] =
     ChainableAction { inner =>
       ctx =>
         f(ctx).onComplete {
@@ -68,17 +75,17 @@ trait ScrapingDsl extends ContextualDsl[ScrapingContext] with ScrapingPipeline w
   }
 
   object RequestMagnet {
-    implicit def fromURL(url: String)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
+    implicit def fromURL(url: String) = new RequestMagnet {
       def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
         sendScrapingRequest(new RequestBuilder(method)(url)).tapply(inner)
       }
     }
-    implicit def fromForm(form: Form)(implicit ec: ExecutionContext, ac: ActorContext) = new RequestMagnet {
+    implicit def fromForm(form: Form) = new RequestMagnet {
       def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
         sendScrapingRequest(new RequestBuilder(method)(form.action, FormData(form.data))).tapply(inner)
       }
     }
-    implicit def fromRequest[T](request: Request[T])(implicit m: Marshaller[T], ec: ExecutionContext, ac: ActorContext) =
+    implicit def fromRequest[T: ToEntityMarshaller](request: Request[T]) =
       new RequestMagnet {
         def apply(method: HttpMethod): ChainableAction1[HttpResponse] = ChainableAction { inner =>
           sendScrapingRequest(new RequestBuilder(method)(request.url, request.content)).tapply(inner)

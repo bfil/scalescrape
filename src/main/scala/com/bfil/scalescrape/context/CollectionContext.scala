@@ -1,6 +1,6 @@
 package com.bfil.scalescrape.context
 
-import akka.actor.{ActorRef, PoisonPill, actorRef2Scala}
+import akka.actor.{ActorRef, PoisonPill}
 
 case class CollectionContext(requestor: ActorRef = ActorRef.noSender, scraper: ActorRef = ActorRef.noSender) {
   def withScraper(newScraper: ActorRef) = this.copy(scraper = newScraper)

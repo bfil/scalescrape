@@ -1,8 +1,9 @@
 package com.bfil.scalescrape.dsl
 
 import akka.testkit.TestProbe
+import org.specs2.mutable.Specification
 
-class CollectionDslSpec extends DslSpec {
+class CollectionDslSpec extends Specification {
 
   "collect" should {
     "call the inner action with a new collection context" in new CollectionDslSpecContext {

@@ -1,8 +1,12 @@
 package com.bfil.scalescrape.matchers
 
-import org.specs2.matcher.{Expectable, Matcher}
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
-import spray.http.{HttpCookie, HttpData, HttpHeader, HttpMethod, HttpRequest}
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpMethod, HttpRequest}
+import akka.http.scaladsl.model.headers.HttpCookie
+import akka.stream.Materializer
+import org.specs2.matcher.{Expectable, Matcher}
 
 trait HttpRequestMatchers {
   def hasMethod(method: HttpMethod) = new Matcher[HttpRequest] {
@@ -18,7 +22,7 @@ trait HttpRequestMatchers {
       s"HTTP request with unexpected uri ${req.value.uri}, expected $uri",
       req)
   }
-  
+
   def hasHeader(header: HttpHeader) = new Matcher[HttpRequest] {
     def apply[A <: HttpRequest](req: Expectable[A]) = result(req.value.headers.contains(header),
       s"HTTP request with unexpected headers ${req.value.headers}, expected $header",
@@ -33,10 +37,14 @@ trait HttpRequestMatchers {
       req)
   }
 
-  def hasData(data: String) = new Matcher[HttpRequest] {
-    def apply[A <: HttpRequest](req: Expectable[A]) = result(HttpData(data) == req.value.entity.data,
+  def hasData(data: String)(implicit mat: Materializer) = new Matcher[HttpRequest] {
+    def apply[A <: HttpRequest](req: Expectable[A]) = result(data == req.value.entity.asString,
       s"HTTP request with unexpected content ${req.value.entity.asString}, expected $data",
       s"HTTP request with unexpected content ${req.value.entity.asString}, expected $data",
       req)
+  }
+
+  implicit class RichHttpEntity(entity: HttpEntity)(implicit mat: Materializer) {
+    def asString() = Await.result(entity.toStrict(1 second), 1 second).data.utf8String
   }
 }

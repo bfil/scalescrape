@@ -1,3 +1,9 @@
+Version 0.3.0 (2015-01-14)
+--------------------------
+- added Scala 2.12 support and dropped Scala 2.10 support
+- replaced spray with akka-http
+
+
 Version 0.2.0 (2015-03-22)
 --------------------------
 - upgrades:

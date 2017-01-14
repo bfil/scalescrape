@@ -2,21 +2,18 @@ package com.bfil.scalescrape.dsl
 
 import scala.concurrent.Future
 
-import org.json4s.{DefaultFormats, Formats}
-import org.json4s.JsonAST.JString
-import org.json4s.jvalue2monadic
-
+import akka.http.scaladsl.model.headers.HttpCookie
+import akka.http.scaladsl.model.HttpMethods.{DELETE, GET, POST, PUT}
+import akka.http.scaladsl.model.HttpResponse
 import com.bfil.scalescrape.context.ScrapingContext
 import com.bfil.scalescrape.data.{Form, Request}
+import de.heikoseeberger.akkahttpjson4s.Json4sSupport
+import org.json4s.{DefaultFormats, Formats}
+import org.json4s.JsonAST.JString
+import org.json4s.native.Serialization
+import org.specs2.mutable.Specification
 
-import spray.http.HttpCookie
-import spray.http.HttpEntity.apply
-import spray.http.HttpMethods.{DELETE, GET, POST, PUT}
-import spray.http.HttpResponse
-import spray.http.StatusCode.int2StatusCode
-import spray.httpx.Json4sSupport
-
-class ScrapingDslSpec extends DslSpec {
+class ScrapingDslSpec extends Specification {
 
   case class Data(key: String, value: Int)
 
@@ -30,7 +27,7 @@ class ScrapingDslSpec extends DslSpec {
 
   "get" should {
     "send a GET request and call the inner action with the response" in new ScrapingDslSpecContext {
-      responder.sendReceive(any) returns Future { HttpResponse(200, "hello") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "hello") }
       get("/some/url").checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("hello")
       }.await
@@ -39,7 +36,7 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "send a GET request and parse an HTML response" in new ScrapingDslSpecContext {
-      responder.sendReceive(any) returns Future { HttpResponse(200, "<span>hello</span>") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "<span>hello</span>") }
       get("/some/url") checkAsync { response =>
         response.asHtml { doc =>
           ctx => doc.$("span").text must beEqualTo("hello")
@@ -48,7 +45,7 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "send a GET request and parse an XML response" in new ScrapingDslSpecContext {
-      responder.sendReceive(any) returns Future { HttpResponse(200, "<say>hello</say>") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "<say>hello</say>") }
       get("/some/url") checkAsync { response =>
         response.asXml { xml =>
           ctx => xml.text must beEqualTo("hello")
@@ -57,7 +54,7 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "send a GET request and parse a JSON response" in new ScrapingDslSpecContext {
-      responder.sendReceive(any) returns Future { HttpResponse(200, "{\"say\":\"hello\"}") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "{\"say\":\"hello\"}") }
       get("/some/url") checkAsync { response =>
         response.asJson { json =>
           ctx => (json \ "say") must beEqualTo(JString("hello"))
@@ -69,7 +66,7 @@ class ScrapingDslSpec extends DslSpec {
   "post" should {
     "send a POST request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       post(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -78,10 +75,11 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "serialize a POST request to JSON and call the inner action with the response" in new ScrapingDslSpecContext with Json4sSupport {
+      implicit val json4sSerialization = Serialization
       implicit def json4sFormats: Formats = DefaultFormats
 
       val request = Request("/some/url", Data("test", 1))
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       post(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -95,7 +93,7 @@ class ScrapingDslSpec extends DslSpec {
     val form = Form("/some/url", formData)
 
     "send a POST request with form data and call the inner action with the response" in new ScrapingDslSpecContext {
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       postForm(form).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -107,7 +105,7 @@ class ScrapingDslSpec extends DslSpec {
   "put" should {
     "send a PUT request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       put(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -116,10 +114,11 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "serialize a PUT request to JSON and call the inner action with the response" in new ScrapingDslSpecContext with Json4sSupport {
+      implicit val json4sSerialization = Serialization
       implicit def json4sFormats: Formats = DefaultFormats
 
       val request = Request("/some/url", Data("test", 1))
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       put(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -131,7 +130,7 @@ class ScrapingDslSpec extends DslSpec {
   "delete" should {
     "send a DELETE request and call the inner action with the response" in new ScrapingDslSpecContext {
       val request = Request("/some/url", "some data")
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       delete(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await
@@ -140,10 +139,11 @@ class ScrapingDslSpec extends DslSpec {
     }
 
     "serialize a DELETE request to JSON and call the inner action with the response" in new ScrapingDslSpecContext with Json4sSupport {
+      implicit val json4sSerialization = Serialization
       implicit def json4sFormats: Formats = DefaultFormats
 
       val request = Request("/some/url", Data("test", 1))
-      responder.sendReceive(any) returns Future { HttpResponse(200, "done") }
+      responder.sendReceive(any) returns Future { HttpResponse(200, entity = "done") }
       delete(request).checkAsync { response =>
         ctx => response.entity.asString must beEqualTo("done")
       }.await

@@ -1,7 +1,7 @@
 package com.bfil.scalescrape.context
 
-import akka.actor.{ActorRef, actorRef2Scala}
-import spray.http.HttpCookie
+import akka.actor.ActorRef
+import akka.http.scaladsl.model.headers.HttpCookie
 
 case class ScrapingContext(requestor: ActorRef = ActorRef.noSender, cookies: Map[String, HttpCookie] = Map.empty) {
   def withCookies(cookies: Map[String, HttpCookie]) = this.copy(cookies = cookies)

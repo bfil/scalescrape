@@ -9,13 +9,13 @@ A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext
 Setting up the dependencies
 ---------------------------
 
-__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.10 and 2.11.
+__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.12 and 2.11. For Scala 2.10 use version `0.2.0`.
 
 Using SBT, add the following dependency to your build file:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.2.0"
+  "com.bfil" %% "scalescrape" % "0.3.0"
 )
 ```
 
@@ -31,7 +31,7 @@ If you need a snapshot dependency:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.3.0-SNAPSHOT"
+  "com.bfil" %% "scalescrape" % "0.4.0-SNAPSHOT"
 )
 
 resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com/nexus/content/repositories/snapshots/";
@@ -56,14 +56,14 @@ The first step is to try to create a representation of the website that we are g
 ```scala
 class ExampleWebsite {
   private val baseUrl = "http://www.example.com"
-  
+
   val homePage = s"$baseUrl/home"
-  
+
   def loginForm(username: String, password: String) =
     Form(s"$baseUrl/vm_sso/idp/login.action", Map(
       "username" -> username,
       "password" -> password))
-      
+
   def updateAccountEmailRequest(newEmail: String) =
     Request(s"$baseUrl/account/update", s"""{"email": "$newEmail" }""")
 }
@@ -233,7 +233,7 @@ To understand the details of the internal mechanics of the DSL read the document
 
 You can create a scraping Akka actor and use the scraping DSL by extending the `ScrapingActor` trait.
 
-__scrape__ 
+__scrape__
 
 ```scala
 def scrape[T](scrapingAction: Action)(implicit ac: ActorContext): Unit
@@ -247,7 +247,7 @@ scape {
 }
 ```
 
-__get__ 
+__get__
 
 ```scala
 def get(url: String)(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
@@ -261,7 +261,7 @@ get("http://www.example.com/home") { response =>
 }
 ```
 
-__post__ 
+__post__
 
 ```scala
 def post[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
@@ -275,7 +275,7 @@ post(Request("http://www.example.com/update", "some data")) { response =>
 }
 ```
 
-__postForm__ 
+__postForm__
 
 ```scala
 def postForm[T](form: Form)(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
@@ -289,7 +289,7 @@ postForm("http://www.example.com/submit-form", Map("some" -> "data")) { response
 }
 ```
 
-__put__ 
+__put__
 
 ```scala
 def put[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
@@ -303,7 +303,7 @@ put(Request("http://www.example.com/update", "some data")) { response =>
 }
 ```
 
-__delete__ 
+__delete__
 
 ```scala
 def delete[T](request: Request[T])(implicit ec: ExecutionContext, ac: ActorContext): ChainableAction1[HttpResponse]
@@ -317,7 +317,7 @@ delete(Request("http://www.example.com/update", "some data")) { response =>
 }
 ```
 
-__cookies__ 
+__cookies__
 
 ```scala
 def cookies: ChainableAction1[Map[String, HttpCookie]]
@@ -331,7 +331,7 @@ cookies { cookies =>
 }
 ```
 
-__withCookies__ 
+__withCookies__
 
 ```scala
 def withCookies(cookies: Map[String, HttpCookie]): ChainableAction0
@@ -345,7 +345,7 @@ withCookies(newCookies) {
 }
 ```
 
-__addCookie__ 
+__addCookie__
 
 ```scala
 def addCookie(cookie: HttpCookie): ChainableAction0
@@ -359,7 +359,7 @@ addCookie(newCookie) {
 }
 ```
 
-__dropCookie__ 
+__dropCookie__
 
 ```scala
 def dropCookie(cookieName: String): ChainableAction0
@@ -373,7 +373,7 @@ dropCookie("someCookie") {
 }
 ```
 
-__complete__ 
+__complete__
 
 ```scala
 def complete[T](message: Any): ActionResult
@@ -385,7 +385,7 @@ Completes the scraping action by sending the specified message back to the origi
 complete("done")
 ```
 
-__fail__ 
+__fail__
 
 ```scala
 def fail: ActionResult
@@ -401,7 +401,7 @@ fail
 
 You can create a collection Akka actor and use the collection DSL by extending the `CollectionActor[T]` trait, where `T` is a `ScrapingActor`.
 
-__collect__ 
+__collect__
 
 ```scala
 def collect(collectionAction: Action)(implicit tag: ClassTag[Scraper], ac: ActorContext): Unit
@@ -415,7 +415,7 @@ collect {
 }
 ```
 
-__collectUsingScraper__ 
+__collectUsingScraper__
 
 ```scala
 def collectUsingScraper(scraper: ActorRef)(collectionAction: Action)(implicit ac: ActorContext): Unit
@@ -456,7 +456,7 @@ askTo("say hello", "say world", "say bye") {
 }
 ```
 
-__scraper__ 
+__scraper__
 
 ```scala
 def scraper: ChainableAction1[ActorRef]
@@ -470,7 +470,7 @@ scraper { scraper =>
 }
 ```
 
-__withScraper__ 
+__withScraper__
 
 ```scala
 def withScraper(scraper: ActorRef): ChainableAction0
@@ -484,7 +484,7 @@ withScraper(newScraper) {
 }
 ```
 
-__notify__ 
+__notify__
 
 ```scala
 def notify[T](message: Any): ChainableAction0
@@ -498,7 +498,7 @@ notify("hello") {
 }
 ```
 
-__complete__ 
+__complete__
 
 ```scala
 def complete[T](message: Any): ActionResult
@@ -510,7 +510,7 @@ Completes the collection action by sending the specified message back to the ori
 complete("done")
 ```
 
-__keepAlive__ 
+__keepAlive__
 
 ```scala
 def keepAlive: ActionResult
@@ -522,7 +522,7 @@ Completes the collection action by not sending any message back to the original 
 keepAlive
 ```
 
-__fail__ 
+__fail__
 
 ```scala
 def fail: ActionResult
@@ -539,7 +539,7 @@ License
 
 This software is licensed under the Apache 2 license, quoted below.
 
-Copyright © 2014 Bruno Filippone <http://b-fil.com>
+Copyright © 2014-2017 Bruno Filippone <http://b-fil.com>
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of

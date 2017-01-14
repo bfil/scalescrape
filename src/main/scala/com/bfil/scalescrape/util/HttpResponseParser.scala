@@ -1,16 +1,34 @@
 package com.bfil.scalescrape.util
 
-import org.json4s.string2JsonInput
+import scala.concurrent.Future
 
-import spray.client.pipelining.unmarshal
-import spray.http.HttpResponse
-import spray.httpx.unmarshalling.BasicUnmarshallers.StringUnmarshaller
-import spray.httpx.unmarshalling.UnmarshallerLifting.{fromMessageUnmarshaller, fromResponseUnmarshaller}
+import com.bfil.scalescrape.dsl.ScrapingDsl
+import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.unmarshalling.PredefinedFromEntityUnmarshallers
+import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
 
-object HttpResponseParser {
-  implicit val stringUnmarshaller = fromResponseUnmarshaller(fromMessageUnmarshaller(StringUnmarshaller))
-  
-  def toHtml(httpResponse: HttpResponse) = org.jsoup.Jsoup.parse(unmarshal[String](stringUnmarshaller)(httpResponse))
-  def toXml(httpResponse: HttpResponse) = scala.xml.XML.loadString(unmarshal[String](stringUnmarshaller)(httpResponse))
-  def toJson(httpResponse: HttpResponse) = org.json4s.native.JsonMethods.parse(unmarshal[String](stringUnmarshaller)(httpResponse))
+trait HttpResponseParser extends PredefinedFromEntityUnmarshallers {
+  self: ScrapingDsl =>
+
+  protected def unmarshal[T: FromEntityUnmarshaller]: HttpResponse => Future[T] = { response =>
+    if (response.status.isSuccess) Unmarshal(response).to[T]
+    else response.discardEntityBytes().future.map { s =>
+      throw new UnsuccessfulResponseException(response)
+    }
+  }
+
+  def parseAsHtml(httpResponse: HttpResponse) =
+    unmarshal[String](stringUnmarshaller)(httpResponse) map { responseString =>
+      org.jsoup.Jsoup.parse(responseString)
+    }
+  def parseAsXml(httpResponse: HttpResponse) =
+    unmarshal[String](stringUnmarshaller)(httpResponse) map { responseString =>
+      scala.xml.XML.loadString(responseString)
+    }
+  def parseAsJson(httpResponse: HttpResponse) =
+    unmarshal[String](stringUnmarshaller)(httpResponse) map { responseString =>
+      org.json4s.native.JsonMethods.parse(responseString)
+    }
 }
+
+class UnsuccessfulResponseException(response: HttpResponse) extends Exception(s"Unsuccessful response: $response")

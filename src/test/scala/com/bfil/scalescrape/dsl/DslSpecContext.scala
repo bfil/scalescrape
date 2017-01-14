@@ -3,20 +3,19 @@ package com.bfil.scalescrape.dsl
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
-import org.specs2.matcher.{Expectable, Matcher, ResultMatchers, ThrownExpectations}
-import org.specs2.mock.Mockito
-import org.specs2.mock.mockito.ArgThat
-import org.specs2.mutable.Around
-
 import akka.actor.{ActorContext, ActorRef, ActorSystem}
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import akka.util.Timeout.durationToTimeout
+import org.specs2.matcher.{Expectable, Matcher, ThrownExpectations}
+import org.specs2.mock.Mockito
+import org.specs2.mutable.Around
 
-trait DslSpecContext extends Around with Mockito with ArgThat with ThrownExpectations with ResultMatchers {
-  implicit val executionContext = scala.concurrent.ExecutionContext.global
-
-  implicit val actorSystem = ActorSystem("test-system")
+trait DslSpecContext extends Around with Mockito with ThrownExpectations {
   implicit val actorContext = mock[ActorContext]
+  implicit val actorSystem = ActorSystem("test-system")
+  implicit val executionContext = actorSystem.dispatcher
+  implicit val materializer: Materializer = ActorMaterializer()(actorSystem)
 
   implicit val selectionTimeout: Timeout = 3 seconds
 
