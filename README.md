@@ -1,7 +1,6 @@
 Scalescrape
 ===========
 
-[![Build Status](https://snap-ci.com/bfil/scalescrape/branch/master/build_image)](https://snap-ci.com/bfil/scalescrape/branch/master)
 [![Codacy Badge](https://www.codacy.com/project/badge/364c7acbb81e47cc8f3e6712289dcb2f)](https://www.codacy.com/app/bfil/scalescrape)
 
 A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext), for building Akka actor systems that scrape and collect data from any type of website.
@@ -9,32 +8,23 @@ A Scala web scraping library, based on [Scalext](https://github.com/bfil/scalext
 Setting up the dependencies
 ---------------------------
 
-__Scalescrape__ is available at my [Nexus Repository](http://nexus.b-fil.com/nexus/content/groups/public/), and it is cross compiled and published for both Scala 2.12 and 2.11. For Scala 2.10 use version `0.2.0`.
+__Scalescrape__ is available on `Maven Central` (since version `0.4.0`), and it is cross compiled and published for Scala 2.12 and 2.11.
+
+*Older artifacts versions are not available anymore due to the shutdown of my self-hosted Nexus Repository in favour of Bintray*
 
 Using SBT, add the following dependency to your build file:
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.3.0"
+  "io.bfil" %% "scalescrape" % "0.4.0"
 )
 ```
 
-Don't forget to add the following resolver:
+
+If you have issues resolving the dependency, you can add the following resolver:
 
 ```scala
-resolvers += "BFil Nexus Releases" at "http://nexus.b-fil.com/nexus/content/repositories/releases/"
-```
-
-### Using snapshots
-
-If you need a snapshot dependency:
-
-```scala
-libraryDependencies ++= Seq(
-  "com.bfil" %% "scalescrape" % "0.4.0-SNAPSHOT"
-)
-
-resolvers += "BFil Nexus Snapshots" at "http://nexus.b-fil.com/nexus/content/repositories/snapshots/";
+resolvers += Resolver.bintrayRepo("bfil", "maven")
 ```
 
 Usage
@@ -539,7 +529,7 @@ License
 
 This software is licensed under the Apache 2 license, quoted below.
 
-Copyright © 2014-2017 Bruno Filippone <http://b-fil.com>
+Copyright © 2014-2017 Bruno Filippone <http://bfil.io>
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
