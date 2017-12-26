@@ -1,6 +1,6 @@
 Version 0.4.0 (2017-12-26)
 --------------------------
-- renamed organization and packages from io.bfil to io.bfil
+- renamed organization and packages from com.bfil to io.bfil
 - published the library to Bintray
 - updated scalext to 0.4.0
 
