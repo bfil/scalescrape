@@ -1,3 +1,11 @@
+Version 0.4.1 (2018-01-22)
+--------------------------
+- bumped akka-http version to 10.0.11
+- bumped akka-http-json4s version to 1.19.0
+- bumped json4s version to 3.5.3
+- added explicit dependency on akka-stream 2.5.8 to help preventing binary incompatibility issues caused by akka-http (see GitHub issue: https://github.com/akka/akka-http/issues/1101#issuecomment-299923102)
+
+
 Version 0.4.0 (2017-12-26)
 --------------------------
 - renamed organization and packages from com.bfil to io.bfil

@@ -3,7 +3,8 @@ lazy val project = Project("scalescrape", file("."))
     "io.bfil" %% "scalext" % scalextVersion,
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-    "de.heikoseeberger" %% "akka-http-json4s" % "1.11.0",
+    "de.heikoseeberger" %% "akka-http-json4s" % "1.19.0",
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "org.json4s" %% "json4s-native" % json4sVersion,
     "org.json4s" %% "json4s-ext" % json4sVersion,
     "org.jsoup" % "jsoup" % "1.10.2",
@@ -37,7 +38,7 @@ lazy val settings = Seq(
 )
 
 lazy val akkaVersion = "2.5.8"
-lazy val akkaHttpVersion = "10.0.1"
-lazy val json4sVersion = "3.5.0"
+lazy val akkaHttpVersion = "10.0.11"
+lazy val json4sVersion = "3.5.3"
 lazy val scalextVersion = "0.4.0"
 lazy val specs2Version = "3.8.6"

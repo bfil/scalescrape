@@ -16,7 +16,7 @@ Using SBT, add the following dependency to your build file:
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.bfil" %% "scalescrape" % "0.4.0"
+  "io.bfil" %% "scalescrape" % "0.4.1"
 )
 ```
 
